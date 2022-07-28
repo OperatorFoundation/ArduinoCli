@@ -2,10 +2,14 @@ import XCTest
 @testable import ArduinoCli
 
 final class ArduinoCliTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(ArduinoCli().text, "Hello, World!")
+    func testInit() throws
+    {
+        let arduino = ArduinoCli.instance
+        XCTAssertNotNil(arduino)
+
+        if let arduino = arduino
+        {
+            arduino.stop()
+        }
     }
 }
