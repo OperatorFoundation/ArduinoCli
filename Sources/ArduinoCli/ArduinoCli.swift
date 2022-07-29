@@ -5,25 +5,9 @@ import Transmission
 
 public class ArduinoCli
 {
-    static public let instance = ArduinoCli()
-    static let arduinoDaemonPort = 50051
+    public var lib: ArduinoCliLib! = nil
 
-    var daemon: Task<Void,Error>? = nil
-
-    public var isRunning: Bool
-    {
-        if let connection = TransmissionConnection(host: "127.0.0.1", port: ArduinoCli.arduinoDaemonPort)
-        {
-            connection.close()
-            return true
-        }
-        else
-        {
-            return false
-        }
-    }
-
-    init?()
+    public init?()
     {
         guard let isInstalled = Homebrew.isInstalled("arduino-cli") else
         {
@@ -36,39 +20,53 @@ public class ArduinoCli
             let _ = Homebrew.install("arduino-cli")
         }
 
-        if !isRunning
-        {
-            self.launch()
-        }
+        let lib = ArduinoCliLib(self)
+        self.lib = lib
     }
 
-    public func stop()
+    public func run(_ args: String...) throws
     {
-        if let daemon = self.daemon
-        {
-            if !daemon.isCancelled
-            {
-                daemon.cancel()
-            }
-        }
+        try self.run(args)
     }
 
-    func launch()
+    public func run(_ args: [String]) throws
     {
-        Command.addDefaultPath("/opt/homebrew/bin")
         let command = Command()
+        command.addPath("/opt/homebrew/bin")
 
-        self.daemon = Task
+        guard let _ = command.run("arduino-cli", args) else
         {
-            guard let _ = command.run("arduino-cli", "daemon") else
-            {
-                throw ArduinoCliError.daemonFailed
-            }
+            throw ArduinoCliError.commandFailed
         }
+    }
+}
+
+public class ArduinoCliLib
+{
+    let cli: ArduinoCli
+
+    public init(_ cli: ArduinoCli)
+    {
+        self.cli = cli
+    }
+
+    public func run(_ args: String...) throws
+    {
+        try self.run(args)
+    }
+
+    public func run(_ args: [String]) throws
+    {
+        try self.cli.run(["lib"] + args)
+    }
+
+    public func install(_ library: String) throws
+    {
+        try self.run("install", library)
     }
 }
 
 public enum ArduinoCliError: Error
 {
-    case daemonFailed
+    case commandFailed
 }

@@ -4,12 +4,7 @@ import XCTest
 final class ArduinoCliTests: XCTestCase {
     func testInit() throws
     {
-        let arduino = ArduinoCli.instance
-        XCTAssertNotNil(arduino)
-
-        if let arduino = arduino
-        {
-            arduino.stop()
-        }
+        let cli = ArduinoCli()
+        XCTAssertNotNil(cli)
     }
 }
