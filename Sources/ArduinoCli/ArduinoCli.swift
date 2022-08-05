@@ -3,12 +3,6 @@ import Foundation
 import Gardener
 import Transmission
 
-// outdated
-// update
-// upgrade
-// upload
-// version
-
 public class ArduinoCli
 {
     public var board: ArduinoCliBoard! = nil
