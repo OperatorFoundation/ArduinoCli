@@ -5,13 +5,25 @@ import Transmission
 
 public class ArduinoCli
 {
+    // subclasses
     public var board: ArduinoCliBoard! = nil
     public var config: ArduinoCliConfig! = nil
     public var core: ArduinoCliCore! = nil
     public var lib: ArduinoCliLib! = nil
     public var sketch: ArduinoCliSketch! = nil
+    
+    // global args
+    public var additionalUrls: String?
+    public var configFile: String?
+    public var format: String?
+    public var help: Bool
+    public var logFile: String?
+    public var logFormat: String?
+    public var logLevel: String?
+    public var noColor: Bool
+    public var verbose: Bool
 
-    public init?()
+    public init?(additionalUrls: String? = nil, configFile: String? = nil, format: String? = nil, help: Bool = false, logFile: String? = nil, logFormat: String? = nil, logLevel: String? = nil, noColor: Bool = false, verbose: Bool = false)
     {
         guard let isInstalled = Homebrew.isInstalled("arduino-cli") else
         {
@@ -24,6 +36,16 @@ public class ArduinoCli
             let _ = Homebrew.install("arduino-cli")
         }
 
+        self.additionalUrls = additionalUrls
+        self.configFile = configFile
+        self.format = format
+        self.help = help
+        self.logFile = logFile
+        self.logFormat = logFormat
+        self.logLevel = logLevel
+        self.noColor = noColor
+        self.verbose = verbose
+        
         let board = ArduinoCliBoard(self)
         self.board = board
         let config = ArduinoCliConfig(self)
@@ -45,8 +67,61 @@ public class ArduinoCli
     {
         let command = Command()
         command.addPath("/opt/homebrew/bin")
+        
+        var globalArgs = args
+        
+        // Comma-separated list of additional URLs for the Boards Manager.
+        if let additionalUrls = self.additionalUrls {
+            globalArgs.append("--additional-urls")
+            globalArgs.append(additionalUrls)
+        }
+        
+        // The custom config file (if not specified the default will be used).
+        if let configFile = self.configFile {
+            globalArgs.append("--config-file")
+            globalArgs.append(configFile)
+        }
+        
+        // The output format for the logs, can be: text, json, jsonmini (default "text")
+        if let format = self.format {
+            globalArgs.append("--format")
+            globalArgs.append(format)
+        }
+        
+        // help for arduino-cli
+        if self.help {
+            globalArgs.append("-h")
+        }
+        
+        // Path to the file where logs will be written.
+        if let logFile = self.logFile {
+            globalArgs.append("--log-file")
+            globalArgs.append(logFile)
+        }
+        
+        // The output format for the logs, can be: text, json
+        if let logFormat = self.logFormat {
+            globalArgs.append("--log-format")
+            globalArgs.append(logFormat)
+        }
+        
+        // Messages with this level and above will be logged. Valid levels are: trace, debug, info, warn, error, fatal, panic
+        if let logLevel = self.logLevel {
+            globalArgs.append("--log-level")
+            globalArgs.append(logLevel)
+        }
+        
+        // Disable colored output.
+        if self.noColor {
+            globalArgs.append("--no-color")
+        }
 
-        guard let _ = command.run("arduino-cli", args) else
+        // Print the logs on the standard output.
+        if self.verbose {
+            globalArgs.append("-v")
+        }
+        
+        guard let _ = command.run("arduino-cli", globalArgs) else
         {
             throw ArduinoCliError.commandFailed
         }
