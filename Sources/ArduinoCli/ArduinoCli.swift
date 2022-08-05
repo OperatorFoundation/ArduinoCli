@@ -3,14 +3,6 @@ import Foundation
 import Gardener
 import Transmission
 
-// burn-bootloader
-// cache clean (library)
-// compile
-// completion
-// daemon
-// debug
-// help
-// monitor
 // outdated
 // update
 // upgrade
@@ -68,30 +60,38 @@ public class ArduinoCli
     
     // Upload the bootloader on the board using an external programmer.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_burn-bootloader/
-    public func burnBootloader(_ boardName: String?, _ port: String?, _ programmer: String?, _ portProtocol: String?, _ verify: Bool = false) throws
+    public func burnBootloader(discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws
     {
-        // FIXME: dont know how to implement "duration"
+        var args: [String] = ["burn-bootloader"]
+        
         // --discovery-timeout duration   Max time to wait for port discovery, e.g.: 30s, 1m (default 5s)
-        var args: String = ""
+        if let discoveryTimeout = discoveryTimeout {
+            args.append("--discovery-timeout")
+            args.append(discoveryTimeout)
+        }
         
         // Fully Qualified Board Name, e.g.: arduino:avr:uno
-        if boardName != nil {
-            args.append("-b \(boardName!) ")
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
         }
         
         // Upload port address, e.g.: COM3 or /dev/ttyACM2
-        if port != nil {
-            args.append("-p \(port!) ")
+        if let port = port {
+            args.append("-p")
+            args.append(port)
         }
         
         // Programmer to use, e.g: atmel_ice
-        if programmer != nil {
-            args.append("-P \(programmer!) ")
+        if let programmer = programmer {
+            args.append("-P")
+            args.append(programmer)
         }
         
         // Upload port protocol, e.g: serial
-        if portProtocol != nil {
-            args.append("-l \(portProtocol!) ")
+        if let portProtocol = portProtocol {
+            args.append("-l")
+            args.append(portProtocol)
         }
         
         // Verify uploaded binary after the upload.
@@ -99,7 +99,7 @@ public class ArduinoCli
             args.append("-t")
         }
         
-        try self.run("burn-bootloader", args)
+        try self.run(args)
     }
     
     // Arduino cache commands
@@ -111,161 +111,394 @@ public class ArduinoCli
     
     // Compiles Arduino sketches
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_compile/
-    public func compile(_ buildCachePath: String?, _ buildPath: String?, _ clean: Bool = false, _ exportBinaries: Bool = false, _ boardName: String?, _ libraries: String?, _ library: String?, _ onlyCompilationDatabase: Bool = false, _ optimizeForDebug: Bool = false, _ outputDir: String?, _ port: String?, _ preprocess: Bool = false, _ programmer: String?, _ portProtocol: String?, _ quiet: Bool = false, _ showProperties: Bool = false, _ upload: Bool = false, _ verify: Bool = false, _ vidPid: String?, _ warnings: String?) throws
+    public func compile(buildCachePath: String? = nil, buildPath: String? = nil, buildProperty: [String]?, clean: Bool = false, discoveryTimeout: String? = nil, exportBinaries: Bool = false, boardName: String? = nil, libraries: String? = nil, library: String? = nil, onlyCompilationDatabase: Bool = false, optimizeForDebug: Bool = false, outputDir: String? = nil, port: String? = nil, preprocess: Bool = false, programmer: String? = nil, portProtocol: String? = nil, quiet: Bool = false, showProperties: Bool = false, upload: Bool = false, verify: Bool = false, vidPid: String? = nil, warnings: String? = nil) throws
     {
-        var args: String = ""
+        var args: [String] = ["compile"]
         
         // Builds of 'core.a' are saved into this path to be cached and reused.
-        if buildCachePath != nil {
-            args.append("--build-cache-path \(buildCachePath!) ")
+        if let buildCachePath = buildCachePath {
+            args.append("--build-cache-path")
+            args.append(buildCachePath)
         }
         
         // Path where to save compiled files. If omitted, a directory will be created in the default temporary path of your OS.
-        if buildPath != nil {
-            args.append("--build-path \(buildPath!) ")
+        if let buildPath = buildPath {
+            args.append("--build-path")
+            args.append(buildPath)
         }
         
-        // FIXME: need to figure out stringArray later
-        // --build-property stringArray   Override a build property with a custom value. Can be used multiple times for multiple properties.
+        // Override a build property with a custom value. Can be used multiple times for multiple properties.
+        if let buildProperty = buildProperty {
+            let buildPropertyList = buildProperty.flatMap { instance in
+                return ["--build-property", instance]
+            }
+            args.append(contentsOf: buildPropertyList)
+        }
         
         // Optional, cleanup the build folder and do not use any cached build.
         if clean {
-            args.append("--clean ")
+            args.append("--clean")
         }
         
-        // FIXME: duration
         // --discovery-timeout duration   Max time to wait for port discovery, e.g.: 30s, 1m (default 5s)
+        if let discoveryTimeout = discoveryTimeout {
+            args.append("--discovery-timeout")
+            args.append(discoveryTimeout)
+        }
         
         // If set built binaries will be exported to the sketch folder.
         if exportBinaries {
-            args.append("-e ")
+            args.append("-e")
         }
         
         // Fully Qualified Board Name, e.g.: arduino:avr:uno
-        if boardName != nil {
-            args.append("-b \(boardName!) ")
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
         }
         
         // List of custom libraries dir paths separated by commas. Or can be used multiple times for multiple libraries dir paths.
-        if libraries != nil {
-            args.append("--libraries \(libraries!) ")
+        if let libraries = libraries {
+            args.append("--libraries")
+            args.append(libraries)
         }
         
         // List of paths to libraries root folders. Libraries set this way have top priority in case of conflicts. Can be used multiple times for different libraries.
-        if library != nil {
-            args.append("--library \(library!) ")
+        if let library = library {
+            args.append("--library")
+            args.append(library)
         }
         
         // Just produce the compilation database, without actually compiling. All build commands are skipped except pre* hooks.
         if onlyCompilationDatabase {
-            args.append("--only-compilation-database ")
+            args.append("--only-compilation-database")
         }
         
         // Optional, optimize compile output for debugging, rather than for release.
         if optimizeForDebug {
-            args.append("--optimize-for-debug ")
+            args.append("--optimize-for-debug")
         }
         
         // Save build artifacts in this directory.
-        if outputDir != nil {
-            args.append("--output-dir \(outputDir!) ")
+        if let outputDir = outputDir {
+            args.append("--output-dir")
+            args.append(outputDir)
         }
         
         // Upload port address, e.g.: COM3 or /dev/ttyACM2
-        if port != nil {
-            args.append("-p \(port!) ")
+        if let port = port {
+            args.append("-p")
+            args.append(port)
         }
         
         // Print preprocessed code to stdout instead of compiling.
         if preprocess {
-            args.append("--preprocess ")
+            args.append("--preprocess")
         }
         
         // Programmer to use, e.g: atmel_ice
-        if programmer != nil {
-            args.append("-P \(programmer!) ")
+        if let programmer = programmer {
+            args.append("-P")
+            args.append(programmer)
         }
         
         // Upload port protocol, e.g: serial
-        if portProtocol != nil {
-            args.append("-l \(portProtocol!) ")
+        if let portProtocol = portProtocol {
+            args.append("-l")
+            args.append(portProtocol)
         }
         
         // Optional, suppresses almost every output.
         if quiet {
-            args.append("--quiet ")
+            args.append("--quiet")
         }
         
         // Show all build properties used instead of compiling.
         if showProperties {
-            args.append("--show-properties ")
+            args.append("--show-properties")
         }
         
         // Upload the binary after the compilation.
         if upload {
-            args.append("-u ")
+            args.append("-u")
         }
         
         // Verify uploaded binary after the upload.
         if verify {
-            args.append("-t ")
+            args.append("-t")
         }
         
         // When specified, VID/PID specific build properties are used, if board supports them.
-        if vidPid != nil {
-            args.append("--vid-pid \(vidPid!) ")
+        if let vidPid = vidPid {
+            args.append("--vid-pid")
+            args.append(vidPid)
         }
         
         // Optional, can be: none, default, more, all. Used to tell gcc which warning level to use (-W flag). (default "none")
-        if warnings != nil {
-            args.append("--warnings \(warnings!)")
+        if let warnings = warnings {
+            args.append("--warnings")
+            args.append(warnings)
         }
         
-        try self.run("compile", args)
+        try self.run(args)
     }
     
     // Generates completion scripts for various shells
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_completion/
-    public func completion(_ shellName: String, _ fileName: String, _ noDescriptions: Bool = false) throws
+    public func completion(shellName: String, fileName: String, noDescriptions: Bool = false) throws
     {
-        var args: String = ""
-        let completionArgs = "\(shellName) > \(fileName)"
+        var args: [String] = ["completion", shellName, ">", fileName]
         
         // Disable completion description for shells that support it
         if noDescriptions {
             args.append("--no-descriptions")
         }
 
-        try self.run("completion", completionArgs, args)
+        try self.run(args)
     }
     
     // Run as a daemon on port: 50051
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_daemon/
-    public func daemon(_ daemonize: Bool = false, _ debug: Bool = false, _ debugFilter: String?, _ port: String?) throws
+    public func daemon(daemonize: Bool = false, debug: Bool = false, debugFilter: String? = nil, port: String? = nil) throws
     {
-        var args: String = ""
+        var args: [String] = ["daemon"]
         
         // Do not terminate daemon process if the parent process dies
         if daemonize {
-            args.append("--daemonize ")
+            args.append("--daemonize")
         }
         
         // Enable debug logging of gRPC calls
         if debug {
-            args.append("--debug ")
+            args.append("--debug")
         }
         
         // Display only the provided gRPC calls
-        if debugFilter != nil {
-            args.append("--debug-filter \(debugFilter!) ")
+        if let debugFilter = debugFilter {
+            args.append("--debug-filter")
+            args.append(debugFilter)
         }
         
         // The TCP port the daemon will listen to
-        if port != nil {
-            args.append("--port \(port!)")
+        if let port = port {
+            args.append("--port")
+            args.append(port)
         }
         
-        try self.run("daemon", args)
+        try self.run(args)
+    }
+    
+    // Debug Arduino sketches. (this command opens an interactive gdb session)
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_debug/
+    public func debug(discoveryTimeout: String? = nil, boardName: String? = nil, info: Bool = false, inputDir: String? = nil, interpreter: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil) throws
+    {
+        var args: [String] = ["debug"]
+        
+        // Max time to wait for port discovery, e.g.: 30s, 1m (default 5s)
+        if let discoveryTimeout = discoveryTimeout {
+            args.append("--discovery-timeout")
+            args.append(discoveryTimeout)
+        }
+        
+        // Fully Qualified Board Name, e.g.: arduino:avr:uno
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
+        }
+        
+        // Show metadata about the debug session instead of starting the debugger.
+        if info {
+            args.append("-I")
+        }
+        
+        // Directory containing binaries for debug.
+        if let inputDir = inputDir {
+            args.append("--input-dir")
+            args.append(inputDir)
+        }
+        
+        // Debug interpreter e.g.: console, mi, mi1, mi2, mi3 (default "console")
+        if let interpreter = interpreter {
+            args.append("--interpreter")
+            args.append(interpreter)
+        }
+        
+        // Upload port address, e.g.: COM3 or /dev/ttyACM2
+        if let port = port {
+            args.append("-p")
+            args.append(port)
+        }
+        
+        // Programmer to use, e.g: atmel_ice
+        if let programmer = programmer {
+            args.append("-P")
+            args.append(programmer)
+        }
+        
+        // Upload port protocol, e.g: serial
+        if let portProtocol = portProtocol {
+            args.append("-l")
+            args.append(portProtocol)
+        }
+        
+        try self.run(args)
+    }
+    
+    // Open a communication port with a board.
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_monitor/
+    public func monitor(config: String? = nil, describe: Bool = false, discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, quiet: Bool = false) throws
+    {
+        var args: [String] = ["monitor"]
+        
+        // Configuration of the port.
+        if let config = config {
+            args.append("--config")
+            args.append(config)
+        }
+        
+        // Show all the settings of the communication port.
+        if describe {
+            args.append("--describe")
+        }
+        
+        // Max time to wait for port discovery, e.g.: 30s, 1m (default 5s)
+        if let discoveryTimeout = discoveryTimeout {
+            args.append("--discovery-timeout")
+            args.append(discoveryTimeout)
+        }
+        
+        // Fully Qualified Board Name, e.g.: arduino:avr:uno
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
+        }
+        
+        // Upload port address, e.g.: COM3 or /dev/ttyACM2
+        if let port = port {
+            args.append("-p")
+            args.append(port)
+        }
+        
+        // Upload port protocol, e.g: serial
+        if let portProtocol = portProtocol {
+            args.append("-l")
+            args.append(portProtocol)
+        }
+        
+        // Run in silent mode, show only monitor input and output.
+        if quiet {
+            args.append("-q")
+        }
+        
+        try self.run(args)
+    }
+    
+    // Lists cores and libraries that can be upgraded
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_outdated/
+    public func outdated() throws
+    {
+        try self.run("outdated")
+    }
+    
+    // Updates the index of cores and libraries
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_update/
+    public func update(showOutdated: Bool = false) throws
+    {
+        var args: [String] = ["update"]
+        
+        // Show outdated cores and libraries after index update
+        if showOutdated {
+            args.append("--show-outdated")
+        }
+        
+        try self.run(args)
+    }
+    
+    // Upgrades installed cores and libraries.
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_upgrade/
+    public func upgrade(runPostInstall: Bool = false, skipPostInstall: Bool = false) throws
+    {
+        var args: [String] = ["upgrade"]
+        
+        // make sure at least one of the two options are false
+        if runPostInstall && skipPostInstall {
+            throw ArduinoCliError.conflictingArgs
+        }
+        
+        // Force run of post-install scripts (if the CLI is not running interactively).
+        if runPostInstall {
+            args.append("--run-post-install")
+        }
+        
+        // Force skip of post-install scripts (if the CLI is running interactively).
+        if skipPostInstall {
+            args.append("--skip-post-install")
+        }
+        
+        try self.run(args)
+    }
+    
+    // Upload Arduino sketches.
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_upload/
+    public func upload(discoveryTimeout: String? = nil, boardName: String? = nil, inputDir: String? = nil, inputFile: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws
+    {
+        var args: [String] = ["upload"]
+        
+        // Max time to wait for port discovery, e.g.: 30s, 1m (default 5s)
+        if let discoveryTimeout = discoveryTimeout {
+            args.append("--discovery-timeout")
+            args.append(discoveryTimeout)
+        }
+        
+        // Fully Qualified Board Name, e.g.: arduino:avr:uno
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
+        }
+        
+        // Directory containing binaries to upload.
+        if let inputDir = inputDir {
+            args.append("--input-dir")
+            args.append(inputDir)
+        }
+        
+        // Binary file to upload.
+        if let inputFile = inputFile {
+            args.append("-i")
+            args.append(inputFile)
+        }
+        
+        // Upload port address, e.g.: COM3 or /dev/ttyACM2
+        if let port = port {
+            args.append("-p")
+            args.append(port)
+        }
+        
+        // Programmer to use, e.g: atmel_ice
+        if let programmer = programmer {
+            args.append("-P")
+            args.append(programmer)
+        }
+        
+        // Upload port protocol, e.g: serial
+        if let portProtocol = portProtocol {
+            args.append("l")
+            args.append(portProtocol)
+        }
+        
+        // Verify uploaded binary after the upload.
+        if verify {
+            args.append("-t")
+        }
+        
+        try self.run(args)
+    }
+    
+    // Shows version number of Arduino CLI.
+    // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_version/
+    public func version() throws
+    {
+        try self.run("version")
     }
 }
 

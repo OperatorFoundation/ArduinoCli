@@ -33,7 +33,7 @@ public class ArduinoCliLib
     
     // Check dependencies status for the specified library.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_deps/
-    public func deps(_ library: String) throws
+    public func deps(library: String) throws
     {
         
         try self.run("deps", library)
@@ -41,35 +41,36 @@ public class ArduinoCliLib
     
     // Downloads one or more libraries without installing them.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_download/
-    public func download(_ library: String) throws
+    public func download(library: String) throws
     {
         try self.run("download", library)
     }
     
     // Shows the list of the examples for libraries.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_examples/
-    // FIXME: will the run panic if one of the fields is an empty string?
-    public func examples(_ library: String, _ boardName: String?) throws
+    public func examples(library: String, boardName: String?) throws
     {
-        var args: String = ""
+        var args: [String] = ["examples", library]
         
         // Fully Qualified Board Name, e.g.: arduino:avr:uno
-        if boardName != nil {
-            args.append("-b \(boardName!)")
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
         }
         
-        try self.run("examples", library, args)
+        try self.run(args)
     }
     
     // Installs one or more specified libraries into the system.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_install/
-    public func install(_ library: String, _ gitUrl: String?, _ noDeps: Bool = false, _ zipPath: String?) throws
+    public func install(library: String, gitUrl: String? = nil, noDeps: Bool = false, zipPath: String?) throws
     {
-        var args: String = ""
+        var args: [String] = ["install", library]
         
         // Enter git url for libraries hosted on repositories
-        if gitUrl != nil {
-            args.append("--git-url \(gitUrl!) ")
+        if let gitUrl = gitUrl {
+            args.append("--git-url")
+            args.append(gitUrl)
         }
         
         // Do not install dependencies.
@@ -78,18 +79,19 @@ public class ArduinoCliLib
         }
         
         // Enter a path to zip file
-        if zipPath != nil {
-            args.append("--zip-path \(zipPath!)")
+        if let zipPath = zipPath {
+            args.append("--zip-path")
+            args.append(zipPath)
         }
         
-        try self.run("install", library, args)
+        try self.run(args)
     }
     
     // Shows a list of installed libraries.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_list/
-    public func list(_ library: String, _ all: Bool = false, _ boardName: String?, _ updateable: Bool = false) throws
+    public func list(library: String, all: Bool = false, boardName: String? = nil, updateable: Bool = false) throws
     {
-        var args: String = ""
+        var args: [String] = ["list", library]
         
         // Include built-in libraries (from platforms and IDE) in listing.
         if all {
@@ -97,8 +99,9 @@ public class ArduinoCliLib
         }
         
         // Fully Qualified Board Name, e.g.: arduino:avr:uno
-        if boardName != nil {
-            args.append("-b \(boardName!)")
+        if let boardName = boardName {
+            args.append("-b")
+            args.append(boardName)
         }
         
         // List updatable libraries.
@@ -106,41 +109,40 @@ public class ArduinoCliLib
             args.append("--updatable")
         }
         
-        try self.run("list", library, args)
+        try self.run(args)
     }
     
     // Searches for one or more libraries data.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_search/
-    public func search(_ library: String, _ names: Bool = false) throws
+    public func search(library: String, names: Bool = false) throws
     {
-        var args: String = ""
+        var args: [String] = ["search", library]
         
         // Show library names only.
         if names {
             args.append("--names")
         }
         
-        try self.run("search", library)
+        try self.run(args)
     }
     
     // Uninstalls one or more libraries.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_uninstall/
-    // TODO: says one or more, but currently only set up for one right?
-    public func uninstall(_ library: String) throws
+    public func uninstall(library: String) throws
     {
         try self.run("uninstall", library)
     }
     
     // Updates the libraries index.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_update-index/
-    public func updateIndex(_ library: String) throws
+    public func updateIndex(library: String) throws
     {
         try self.run("update-index", library)
     }
     
     // Upgrades installed libraries.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_upgrade/
-    public func upgrade(_ library: String) throws
+    public func upgrade(library: String) throws
     {
         try self.run("upgrade", library)
     }

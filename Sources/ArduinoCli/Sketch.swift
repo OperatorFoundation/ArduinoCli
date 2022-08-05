@@ -33,15 +33,15 @@ public class ArduinoCliSketch
     
     // Creates a zip file containing all sketch files.
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_archive/
-    public func archive(_ sketchPath: String?, _ archivePath: String?, _ includeBuildDir: Bool = false) throws
+    public func archive(sketchPath: String? = nil, archivePath: String? = nil, includeBuildDir: Bool = false) throws
     {
-        var args: String = ""
+        var args: [String] = ["archive"]
         
         // FIXME: verify that you cant use archive path without sketch path
-        if sketchPath != nil {
-            args.append("\(sketchPath!) ")
-            if archivePath != nil {
-                args.append("\(archivePath!) ")
+        if let sketchPath = sketchPath {
+            args.append(sketchPath)
+            if let archivePath = archivePath {
+                args.append(archivePath)
             }
         }
         
@@ -50,12 +50,12 @@ public class ArduinoCliSketch
             args.append("--include-build-dir")
         }
         
-        try self.run("archive", args)
+        try self.run(args)
     }
     
     // Create a new Sketch
     // https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_new/
-    public func new(_ sketchName: String) throws
+    public func new(sketchName: String) throws
     {
         try self.run("new", sketchName)
     }
