@@ -21,14 +21,14 @@ public class ArduinoCliBoard
         self.cli = cli
     }
 
-    public func run(_ args: String...) throws
+    public func run(_ args: String...) throws -> Data
     {
-        try self.run(args)
+        return try self.run(args)
     }
 
-    public func run(_ args: [String]) throws
+    public func run(_ args: [String]) throws -> Data
     {
-        try self.cli.run(["board"] + args)
+        return try self.cli.run(["board"] + args)
     }
     
     /// attatches a sketch to a board
@@ -40,7 +40,7 @@ public class ArduinoCliBoard
     /// - Parameter discoveryTimeout: Max time to wait for port discovery, e.g.: 30s, 1m (default 1s)
     ///
     /// - Throws: throws if the command fails to execute
-    public func attatch(boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, discoveryTimeout: String? = nil) throws
+    public func attatch(boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, discoveryTimeout: String? = nil) throws -> Data
     {
         var args: [String] = ["attatch"]
         
@@ -69,7 +69,7 @@ public class ArduinoCliBoard
             args.append(discoveryTimeout)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// print details about a board
@@ -80,7 +80,7 @@ public class ArduinoCliBoard
     /// - Parameter listProgrammers: Show list of available programmers
     ///
     /// - Throws: throws if the command fails to execute
-    public func details(boardName: String? = nil, full: Bool = false, listProgrammers: Bool = false) throws
+    public func details(boardName: String? = nil, full: Bool = false, listProgrammers: Bool = false) throws -> Data
     {
         var args: [String] = ["details"]
         
@@ -97,7 +97,7 @@ public class ArduinoCliBoard
             args.append("--list-programmers")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// List connected boards
@@ -107,7 +107,7 @@ public class ArduinoCliBoard
     /// - Parameter discoveryTimeout: Max time to wait for port discovery, e.g.: 30s, 1m (default 1s)
     ///
     /// - Throws: throws if the command fails to execute
-    public func list(watch: Bool = false, discoveryTimeout: String? = nil) throws
+    public func list(watch: Bool = false, discoveryTimeout: String? = nil) throws -> Data
     {
         var args: [String] = ["list"]
         
@@ -120,7 +120,7 @@ public class ArduinoCliBoard
             args.append(discoveryTimeout)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// List all known boards and their corresponding FQBN
@@ -130,7 +130,7 @@ public class ArduinoCliBoard
     /// - Parameter showHidden: Show also boards marked as 'hidden' in the platform
     ///
     /// - Throws: throws if the command fails to execute
-    public func listAll(boardName: String? = nil, showHidden: Bool = false) throws
+    public func listAll(boardName: String? = nil, showHidden: Bool = false) throws -> Data
     {
         var args: [String] = ["listall"]
         
@@ -143,7 +143,7 @@ public class ArduinoCliBoard
             args.append("-a")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// List all known boards and their corresponding FQBN
@@ -153,7 +153,7 @@ public class ArduinoCliBoard
     /// - Parameter showHidden: Show also boards marked as 'hidden' in the platform
     ///
     /// - Throws: throws if the command fails to execute
-    public func search(boardName: String? = nil, showHidden: Bool = false) throws
+    public func search(boardName: String? = nil, showHidden: Bool = false) throws -> Data
     {
         var args: [String] = ["search"]
         
@@ -166,6 +166,6 @@ public class ArduinoCliBoard
             args.append("-a")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
 }

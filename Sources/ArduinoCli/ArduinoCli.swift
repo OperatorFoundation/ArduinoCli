@@ -58,12 +58,12 @@ public class ArduinoCli
         self.sketch = sketch
     }
 
-    public func run(_ args: String...) throws
+    public func run(_ args: String...) throws -> Data
     {
-        try self.run(args)
+        return try self.run(args)
     }
 
-    public func run(_ args: [String]) throws
+    public func run(_ args: [String]) throws -> Data
     {
         let command = Command()
         command.addPath("/opt/homebrew/bin")
@@ -121,10 +121,16 @@ public class ArduinoCli
             globalArgs.append("-v")
         }
         
-        guard let _ = command.run("arduino-cli", globalArgs) else
+        guard let (exitCode, output, _) = command.run("arduino-cli", globalArgs) else
         {
             throw ArduinoCliError.commandFailed
         }
+        
+        guard exitCode == 0 else {
+            throw ArduinoCliError.commandFailed
+        }
+        
+        return output
     }
     
     /// Upload the bootloader on the board using an external programmer.
@@ -138,7 +144,7 @@ public class ArduinoCli
     /// - Parameter verify: Verify uploaded binary after the upload.
     ///
     /// - Throws: throws if the command fails to execute
-    public func burnBootloader(discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws
+    public func burnBootloader(discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws -> Data
     {
         var args: [String] = ["burn-bootloader"]
         
@@ -171,17 +177,17 @@ public class ArduinoCli
             args.append("-t")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Arduino cache commands
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_cache/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func cacheClean() throws
+    public func cacheClean() throws -> Data
     {
         let args: [String] = ["cache", "clean"]
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Compiles Arduino sketches
@@ -211,7 +217,7 @@ public class ArduinoCli
     /// - Parameter warnings: Optional, can be: none, default, more, all. Used to tell gcc which warning level to use (-W flag). (default "none")
     ///
     /// - Throws: throws if the command fails to execute
-    public func compile(buildCachePath: String? = nil, buildPath: String? = nil, buildProperty: [String]?, clean: Bool = false, discoveryTimeout: String? = nil, exportBinaries: Bool = false, boardName: String? = nil, libraries: String? = nil, library: String? = nil, onlyCompilationDatabase: Bool = false, optimizeForDebug: Bool = false, outputDir: String? = nil, port: String? = nil, preprocess: Bool = false, programmer: String? = nil, portProtocol: String? = nil, quiet: Bool = false, showProperties: Bool = false, upload: Bool = false, verify: Bool = false, vidPid: String? = nil, warnings: String? = nil) throws
+    public func compile(buildCachePath: String? = nil, buildPath: String? = nil, buildProperty: [String]?, clean: Bool = false, discoveryTimeout: String? = nil, exportBinaries: Bool = false, boardName: String? = nil, libraries: String? = nil, library: String? = nil, onlyCompilationDatabase: Bool = false, optimizeForDebug: Bool = false, outputDir: String? = nil, port: String? = nil, preprocess: Bool = false, programmer: String? = nil, portProtocol: String? = nil, quiet: Bool = false, showProperties: Bool = false, upload: Bool = false, verify: Bool = false, vidPid: String? = nil, warnings: String? = nil) throws -> Data
     {
         var args: [String] = ["compile"]
         
@@ -318,7 +324,7 @@ public class ArduinoCli
             args.append(warnings)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Generates completion scripts for various shells
@@ -329,7 +335,7 @@ public class ArduinoCli
     /// - Parameter noDescriptions: Disable completion description for shells that support it
     ///
     /// - Throws: throws if the command fails to execute
-    public func completion(shellName: String, fileName: String, noDescriptions: Bool = false) throws
+    public func completion(shellName: String, fileName: String, noDescriptions: Bool = false) throws -> Data
     {
         var args: [String] = ["completion", shellName, ">", fileName]
         
@@ -337,7 +343,7 @@ public class ArduinoCli
             args.append("--no-descriptions")
         }
 
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Run as a daemon on port: 50051
@@ -349,7 +355,7 @@ public class ArduinoCli
     /// - Parameter port: The TCP port the daemon will listen to
     ///
     /// - Throws: throws if the command fails to execute
-    public func daemon(daemonize: Bool = false, debug: Bool = false, debugFilter: String? = nil, port: String? = nil) throws
+    public func daemon(daemonize: Bool = false, debug: Bool = false, debugFilter: String? = nil, port: String? = nil) throws -> Data
     {
         var args: [String] = ["daemon"]
         
@@ -371,7 +377,7 @@ public class ArduinoCli
             args.append(port)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Debug Arduino sketches. (this command opens an interactive gdb session)
@@ -387,7 +393,7 @@ public class ArduinoCli
     /// - Parameter portProtocol: Upload port protocol, e.g: serial
     ///
     /// - Throws: throws if the command fails to execute
-    public func debug(discoveryTimeout: String? = nil, boardName: String? = nil, info: Bool = false, inputDir: String? = nil, interpreter: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil) throws
+    public func debug(discoveryTimeout: String? = nil, boardName: String? = nil, info: Bool = false, inputDir: String? = nil, interpreter: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil) throws -> Data
     {
         var args: [String] = ["debug"]
         
@@ -430,7 +436,7 @@ public class ArduinoCli
             args.append(portProtocol)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Open a communication port with a board.
@@ -445,7 +451,7 @@ public class ArduinoCli
     /// - Parameter quiet: Run in silent mode, show only monitor input and output.
     ///
     /// - Throws: throws if the command fails to execute
-    public func monitor(config: String? = nil, describe: Bool = false, discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, quiet: Bool = false) throws
+    public func monitor(config: String? = nil, describe: Bool = false, discoveryTimeout: String? = nil, boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, quiet: Bool = false) throws -> Data
     {
         var args: [String] = ["monitor"]
         
@@ -482,16 +488,16 @@ public class ArduinoCli
             args.append("-q")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Lists cores and libraries that can be upgraded
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_outdated/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func outdated() throws
+    public func outdated() throws -> Data
     {
-        try self.run("outdated")
+        return try self.run("outdated")
     }
     
     /// Updates the index of cores and libraries
@@ -500,7 +506,7 @@ public class ArduinoCli
     /// - Parameter showOutdated: Show outdated cores and libraries after index update
     ///
     /// - Throws: throws if the command fails to execute
-    public func update(showOutdated: Bool = false) throws
+    public func update(showOutdated: Bool = false) throws -> Data
     {
         var args: [String] = ["update"]
         
@@ -508,7 +514,7 @@ public class ArduinoCli
             args.append("--show-outdated")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Upgrades installed cores and libraries.
@@ -520,7 +526,7 @@ public class ArduinoCli
     /// - Throws: throws if the command fails to execute
     ///
     /// - Note: runPostInstall and skipPostInstall cannot both be true.
-    public func upgrade(runPostInstall: Bool = false, skipPostInstall: Bool = false) throws
+    public func upgrade(runPostInstall: Bool = false, skipPostInstall: Bool = false) throws -> Data
     {
         var args: [String] = ["upgrade"]
         
@@ -536,7 +542,7 @@ public class ArduinoCli
             args.append("--skip-post-install")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Upload Arduino sketches.
@@ -552,7 +558,7 @@ public class ArduinoCli
     /// - Parameter verify: Verify uploaded binary after the upload.
     ///
     /// - Throws: throws if the command fails to execute
-    public func upload(discoveryTimeout: String? = nil, boardName: String? = nil, inputDir: String? = nil, inputFile: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws
+    public func upload(discoveryTimeout: String? = nil, boardName: String? = nil, inputDir: String? = nil, inputFile: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws -> Data
     {
         var args: [String] = ["upload"]
         
@@ -595,16 +601,16 @@ public class ArduinoCli
             args.append("-t")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Shows version number of Arduino CLI.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_version/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func version() throws
+    public func version() throws -> Data
     {
-        try self.run(["version"])
+        return try self.run(["version"])
     }
 }
 

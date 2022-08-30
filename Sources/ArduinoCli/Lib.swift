@@ -21,33 +21,33 @@ public class ArduinoCliLib
         self.cli = cli
     }
 
-    public func run(_ args: String...) throws
+    public func run(_ args: String...) throws -> Data
     {
-        try self.run(args)
+        return try self.run(args)
     }
 
-    public func run(_ args: [String]) throws
+    public func run(_ args: [String]) throws -> Data
     {
-        try self.cli.run(["lib"] + args)
+        return try self.cli.run(["lib"] + args)
     }
     
     /// Check dependencies status for the specified library.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_deps/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func deps(library: String) throws
+    public func deps(library: String) throws -> Data
     {
         
-        try self.run(["deps", library])
+        return try self.run(["deps", library])
     }
     
     /// Downloads one or more libraries without installing them.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_download/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func download(library: String) throws
+    public func download(library: String) throws -> Data
     {
-        try self.run(["download", library])
+        return try self.run(["download", library])
     }
     
     /// Shows the list of the examples for libraries.
@@ -56,7 +56,7 @@ public class ArduinoCliLib
     /// - Parameter boardName: Fully Qualified Board Name, e.g.: arduino:avr:uno
     ///
     /// - Throws: throws if the command fails to execute
-    public func examples(library: String, boardName: String?) throws
+    public func examples(library: String, boardName: String? = nil) throws -> Data
     {
         var args: [String] = ["examples", library]
         
@@ -65,7 +65,7 @@ public class ArduinoCliLib
             args.append(boardName)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Installs one or more specified libraries into the system.
@@ -76,7 +76,7 @@ public class ArduinoCliLib
     /// - Parameter zipPath: Enter a path to zip file
     ///
     /// - Throws: throws if the command fails to execute
-    public func install(library: String, gitUrl: String? = nil, noDeps: Bool = false, zipPath: String?) throws
+    public func install(library: String, gitUrl: String? = nil, noDeps: Bool = false, zipPath: String? = nil) throws -> Data
     {
         var args: [String] = ["install", library]
         
@@ -94,7 +94,7 @@ public class ArduinoCliLib
             args.append(zipPath)
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Shows a list of installed libraries.
@@ -105,7 +105,7 @@ public class ArduinoCliLib
     /// - Parameter updatable: List updatable libraries.
     ///
     /// - Throws: throws if the command fails to execute
-    public func list(library: String, all: Bool = false, boardName: String? = nil, updatable: Bool = false) throws
+    public func list(library: String, all: Bool = false, boardName: String? = nil, updatable: Bool = false) throws -> Data
     {
         var args: [String] = ["list", library]
         
@@ -122,7 +122,7 @@ public class ArduinoCliLib
             args.append("--updatable")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Searches for one or more libraries data.
@@ -131,7 +131,7 @@ public class ArduinoCliLib
     /// - Parameter names: Show library names only.
     ///
     /// - Throws: throws if the command fails to execute
-    public func search(library: String, names: Bool = false) throws
+    public func search(library: String, names: Bool = false) throws -> Data
     {
         var args: [String] = ["search", library]
         
@@ -139,33 +139,33 @@ public class ArduinoCliLib
             args.append("--names")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Uninstalls one or more libraries.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_uninstall/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func uninstall(library: String) throws
+    public func uninstall(library: String) throws -> Data
     {
-        try self.run(["uninstall", library])
+        return try self.run(["uninstall", library])
     }
     
     /// Updates the libraries index.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_update-index/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func updateIndex(library: String) throws
+    public func updateIndex(library: String) throws -> Data
     {
-        try self.run(["update-index", library])
+        return try self.run(["update-index", library])
     }
     
     /// Upgrades installed libraries.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_lib_upgrade/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func upgrade(library: String) throws
+    public func upgrade(library: String) throws -> Data
     {
-        try self.run(["upgrade", library])
+        return try self.run(["upgrade", library])
     }
 }

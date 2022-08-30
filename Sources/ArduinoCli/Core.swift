@@ -21,23 +21,23 @@ public class ArduinoCliCore
         self.cli = cli
     }
 
-    public func run(_ args: String...) throws
+    public func run(_ args: String...) throws -> Data
     {
-        try self.run(args)
+        return try self.run(args)
     }
 
-    public func run(_ args: [String]) throws
+    public func run(_ args: [String]) throws -> Data
     {
-        try self.cli.run(["core"] + args)
+        return try self.cli.run(["core"] + args)
     }
     
     /// Downloads one or more cores and corresponding tool dependencies.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_core_download/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func download(core: String) throws
+    public func download(core: String) throws -> Data
     {
-        try self.run(["download", core])
+        return try self.run(["download", core])
     }
     
     /// Installs one or more cores and corresponding tool dependencies.
@@ -50,7 +50,7 @@ public class ArduinoCliCore
     /// - Throws: throws if the command fails to execute
     ///
     /// - Note: cannot set both runPostInstall and skipPostInstall to true
-    public func install(core: String, runPostInstall: Bool = false, skipPostInstall: Bool = false) throws
+    public func install(core: String, runPostInstall: Bool = false, skipPostInstall: Bool = false) throws -> Data
     {
         var args: [String] = ["install", core]
         
@@ -66,7 +66,7 @@ public class ArduinoCliCore
             args.append("--skip-post-install")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Shows the list of installed platforms.
@@ -76,7 +76,7 @@ public class ArduinoCliCore
     /// - Parameter updatable: List updatable platforms.
     ///
     /// - Throws: throws if the command fails to execute
-    public func list(all: Bool = false, updatable: Bool = false) throws
+    public func list(all: Bool = false, updatable: Bool = false) throws -> Data
     {
         var args: [String] = ["list"]
         
@@ -88,7 +88,7 @@ public class ArduinoCliCore
             args.append("--updatable")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Search for a core in Boards Manager.
@@ -97,7 +97,7 @@ public class ArduinoCliCore
     /// - Parameter all: Show all available core versions.
     ///
     /// - Throws: throws if the command fails to execute
-    public func search(keywords: String, all: Bool = false) throws
+    public func search(keywords: String, all: Bool = false) throws -> Data
     {
         var args: [String] = ["search", keywords]
         
@@ -105,25 +105,25 @@ public class ArduinoCliCore
             args.append("--all")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
     
     /// Uninstalls one or more cores and corresponding tool dependencies if no longer used.
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_core_uninstall/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func uninstall(cores: String) throws
+    public func uninstall(cores: String) throws -> Data
     {
-        try self.run(["uninstall", cores])
+        return try self.run(["uninstall", cores])
     }
     
     /// Updates the index of cores to the latest version
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_core_update-index/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func updateIndex() throws
+    public func updateIndex() throws -> Data
     {
-        try self.run(["update-index"])
+        return try self.run(["update-index"])
     }
     
     /// Upgrades one or all installed platforms to the latest version.
@@ -135,7 +135,7 @@ public class ArduinoCliCore
     /// - Throws: throws if the command fails to execute
     ///
     /// - Note: cannot set both runPostInstall and skipPostInstall to true
-    public func upgrade(core: String? = nil, runPostInstall: Bool = false, skipPostInstall: Bool = false) throws
+    public func upgrade(core: String? = nil, runPostInstall: Bool = false, skipPostInstall: Bool = false) throws -> Data
     {
         var args: [String] = ["upgrade"]
         
@@ -155,6 +155,6 @@ public class ArduinoCliCore
             args.append("--skip-post-install")
         }
         
-        try self.run(args)
+        return try self.run(args)
     }
 }
