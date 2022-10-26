@@ -36,7 +36,7 @@ public class ArduinoCliConfig
     /// - Throws: throws if the command fails to execute
     public func add(flags: [String], setting: CliConfig) throws -> Data
     {
-        var args: [String] = ["config", "add"]
+        var args: [String] = ["add"]
         
         switch setting {
             case .boardManager(.additionalUrls):
@@ -77,9 +77,9 @@ public class ArduinoCliConfig
     /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_config_delete/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func delete(flags: String, setting: CliConfig, deleteSubKeys: Bool) throws -> Data
+    public func delete(setting: CliConfig, deleteSubKeys: Bool) throws -> Data
     {
-        var args: [String] = ["config", "delete"]
+        var args: [String] = ["delete"]
         
         if deleteSubKeys {
             switch setting {
@@ -135,7 +135,6 @@ public class ArduinoCliConfig
             }
         }
         
-        args.append(flags)
         return try self.run(args)
     }
     
@@ -189,7 +188,7 @@ public class ArduinoCliConfig
     /// - Throws: throws if the command fails to execute
     public func remove(flags: [String], setting: CliConfig) throws -> Data
     {
-        var args: [String] = ["config", "add"]
+        var args: [String] = ["remove"]
         
         switch setting {
             case .boardManager(.additionalUrls):
@@ -232,7 +231,7 @@ public class ArduinoCliConfig
     /// - Throws: throws if the command fails to execute
     public func set(flags: String, setting: CliConfig) throws -> Data
     {
-        var args: [String] = ["config", "set"]
+        var args: [String] = ["set"]
         switch setting {
             case .boardManager(.additionalUrls):
                 args.append("board_manager.additional_urls")
