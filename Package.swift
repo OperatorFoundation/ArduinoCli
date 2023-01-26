@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Gardener", branch: "main"),
         .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Transmission", branch: "main"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -28,11 +29,16 @@ let package = Package(
                 "Gardener",
                 .product(name: "GRPC", package: "grpc-swift"),
                 "Transmission",
+                "Yams",
             ]
         ),
         .testTarget(
             name: "ArduinoCliTests",
-            dependencies: ["ArduinoCli"]),
+            dependencies: [
+                "ArduinoCli",
+                "Yams",
+            ]
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )

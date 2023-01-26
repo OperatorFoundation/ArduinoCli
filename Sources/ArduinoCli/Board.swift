@@ -40,14 +40,20 @@ public class ArduinoCliBoard
     /// - Parameter discoveryTimeout: Max time to wait for port discovery, e.g.: 30s, 1m (default 1s)
     ///
     /// - Throws: throws if the command fails to execute
-    public func attatch(boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, discoveryTimeout: String? = nil) throws -> Data
+    public func attach(sketchName: String, boardName: String? = nil, port: String? = nil, portProtocol: String? = nil, discoveryTimeout: String? = nil) throws -> Data
     {
-        var args: [String] = ["attatch"]
+        var args: [String] = ["attach"]
         
         if (boardName != nil && port != nil) || (boardName == nil && port == nil) {
             print("must have either boardName or port, but not both")
             throw ArduinoCliError.conflictingArgs
         }
+        
+        guard let cliConfigFile = self.cli.configFile else {
+            throw ArduinoCliBoardError.missingConfigFile
+        }
+        
+        args.append("\(cliConfigFile.directories.user)/\(sketchName)")
         
         if let boardName = boardName {
             args.append("-b")
@@ -168,4 +174,8 @@ public class ArduinoCliBoard
         
         return try self.run(args)
     }
+}
+
+public enum ArduinoCliBoardError: Error {
+    case missingConfigFile
 }

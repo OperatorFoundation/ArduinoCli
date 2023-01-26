@@ -1,5 +1,6 @@
 import XCTest
 import Datable
+import Yams
 @testable import ArduinoCli
 
 final class ArduinoCliTests: XCTestCase {
@@ -121,7 +122,7 @@ final class ArduinoCliTests: XCTestCase {
             print("setDataDirectoryOutput: \(setDataDirectoryOutput.string)\n")
             
             let lib = ArduinoCliLib(cli)
-            let downloadOutput = try lib.download(library: "wordwrap")
+            let downloadOutput = try lib.install(library: "wordwrap")
             print("downloadOutput: \(downloadOutput.string)")
             
             let configFileString = try String(contentsOf: configURL)
@@ -135,5 +136,64 @@ final class ArduinoCliTests: XCTestCase {
             print("configTest failed error: \(error)")
             XCTFail()
         }
+    }
+    
+    func testSketch() throws {
+        // sketch.new(), core.install, board.attatch, ArduinoCli.upload
+        
+        let arduinoCliDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/ArduinoCli", isDirectory: true)
+        let configURL = arduinoCliDirectory.appendingPathComponent("config.yaml", isDirectory: false)
+        let userDir = arduinoCliDirectory.appendingPathComponent("user", isDirectory: true)
+        
+        guard let cli = ArduinoCli(configFile: configURL.path) else
+        {
+            XCTFail()
+            return
+        }
+        
+        
+        let configEnum = ArduinoCliConfig.CliConfig.self
+        
+        let setOutput = try cli.config.set(flags: "https://adafruit.github.io/arduino-board-index/package_adafruit_index.json", setting: configEnum.boardManager(configEnum.BoardManager.additionalUrls))
+        
+        let sketchOutput = try cli.sketch.new(sketchName: "WordWrap", sketchPath: userDir.path)
+        print("sketchOutput: \(sketchOutput.string)\n")
+        
+        let coreOutput = try cli.core.install(core: "adafruit:samd")
+        print("coreOutput: \(coreOutput.string)\n")
+        
+        let searchOutput = try cli.core.search(keywords: "m4")
+        print("searchOutput \(searchOutput.string)\n")
+        
+        let boardOutput = try cli.board.attach(sketchName: "WordWrap", boardName: "adafruit:samd:feather_m4")
+        print("boardOutput: \(boardOutput.string)\n")
+        
+        let uploadOutput = try cli.upload(sketchPath: userDir.appendingPathComponent("WordWrap", isDirectory: true).path)
+        print("uploadOutput: \(uploadOutput.string)\n")
+    }
+    
+    func testYamlEncode() throws {
+        let arduinoCliDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/ArduinoCli", isDirectory: true)
+        let configURL = arduinoCliDirectory.appendingPathComponent("config.yaml", isDirectory: false)
+        
+        let fileData = try Data(contentsOf: configURL)
+        let yamlDecoder = YAMLDecoder()
+        let arduinoCliConfigFile = try yamlDecoder.decode(ArduinoCliConfigFile.self, from: fileData)
+        print(arduinoCliConfigFile)
+    }
+    
+    func testYamlFields() throws {
+        let arduinoCliDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/ArduinoCli", isDirectory: true)
+        let configURL = arduinoCliDirectory.appendingPathComponent("config.yaml", isDirectory: false)
+        
+        let fileData = try Data(contentsOf: configURL)
+        let yamlDecoder = YAMLDecoder()
+        let arduinoCliConfigFile = try yamlDecoder.decode(ArduinoCliConfigFile.self, from: fileData)
+        let format = arduinoCliConfigFile.logging.format
+        XCTAssertEqual(format, "text")
+        let additionalUrls = arduinoCliConfigFile.boardManager.additionalUrls[0]
+        XCTAssertEqual(additionalUrls, "https://adafruit.github.io/arduino-board-index/package_adafruit_index.json")
+        let dataDirectory = arduinoCliConfigFile.directories.data
+        XCTAssertEqual(dataDirectory, "/Users/bluesaxorcist/Library/ArduinoCli/data")
     }
 }

@@ -9,6 +9,7 @@ import Foundation
 
 import Gardener
 import Transmission
+import Yams
 
 /// Arduino core operations.
 /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_core/)
@@ -50,7 +51,7 @@ public class ArduinoCliCore
     /// - Throws: throws if the command fails to execute
     ///
     /// - Note: cannot set both runPostInstall and skipPostInstall to true
-    public func install(core: String, runPostInstall: Bool = false, skipPostInstall: Bool = false) throws -> Data
+    public func install(core: String, runPostInstall: Bool = false, skipPostInstall: Bool = false, urlList: [URL] = []) throws -> Data
     {
         var args: [String] = ["install", core]
         
@@ -64,6 +65,30 @@ public class ArduinoCliCore
         
         if skipPostInstall {
             args.append("--skip-post-install")
+        }
+        
+        let arduinoCliDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/ArduinoCli", isDirectory: true)
+        let configURL = arduinoCliDirectory.appendingPathComponent("config.yaml", isDirectory: false)
+        
+        let fileData = try Data(contentsOf: configURL)
+        let yamlDecoder = YAMLDecoder()
+        let arduinoCliConfigFile = try yamlDecoder.decode(ArduinoCliConfigFile.self, from: fileData)
+        let additionalUrls = arduinoCliConfigFile.boardManager.additionalUrls
+        let dataDirectory = arduinoCliConfigFile.directories.data
+        print("data directory: \(dataDirectory)")
+        
+        for urlString in additionalUrls
+        {
+            guard let url = URL(string: urlString) else
+            {
+                throw ArduinoCliCoreError.invalidUrlError
+            }
+            
+            let fileName = url.lastPathComponent
+            let dataDirectoryUrl = URL(fileURLWithPath: dataDirectory)
+            let packageUrl = dataDirectoryUrl.appendingPathComponent(fileName)
+            let packageData = try Data(contentsOf: url)
+            try packageData.write(to: packageUrl)
         }
         
         return try self.run(args)
@@ -157,4 +182,8 @@ public class ArduinoCliCore
         
         return try self.run(args)
     }
+}
+
+public enum ArduinoCliCoreError: Error {
+    case invalidUrlError
 }

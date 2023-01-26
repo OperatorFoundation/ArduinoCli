@@ -32,7 +32,7 @@ public class ArduinoCliSketch
     }
     
     /// Creates a zip file containing all sketch files.
-    /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_archive/\
+    /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_archive/)
     ///
     /// - Parameter includeBuildDir: Includes build directory in the archive.
     ///
@@ -58,11 +58,30 @@ public class ArduinoCliSketch
     }
     
     /// Create a new Sketch
-    /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_new/
+    /// - seealso: [arduino-cli documentation](https://arduino.github.io/arduino-cli/0.20/commands/arduino-cli_sketch_new/)
     ///
     /// - Throws: throws if the command fails to execute
-    public func new(sketchName: String) throws -> Data
+    public func new(sketchName: String, sketchPath: String?) throws -> Data
     {
-        return try self.run(["new", sketchName])
+        if let sketchPath = sketchPath {
+            guard File.pushd(sketchPath)else {
+                throw SketchErrors.pushdFailed
+            }
+        }
+        
+        let newResult = try self.run(["new", sketchName])
+        
+        if let sketchPath = sketchPath {
+            guard File.popd() else {
+                throw SketchErrors.popdFailed
+            }
+        }
+        
+        return newResult
     }
+}
+
+public enum SketchErrors: Error {
+    case pushdFailed
+    case popdFailed
 }

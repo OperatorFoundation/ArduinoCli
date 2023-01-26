@@ -2,6 +2,7 @@ import Foundation
 
 import Gardener
 import Transmission
+import Yams
 
 public class ArduinoCli
 {
@@ -14,7 +15,7 @@ public class ArduinoCli
     
     // global args
     public var additionalUrls: String?
-    public var configFile: String?
+    public var configFilePath: String
     public var format: String?
     public var help: Bool
     public var logFile: String?
@@ -22,6 +23,21 @@ public class ArduinoCli
     public var logLevel: String?
     public var noColor: Bool
     public var verbose: Bool
+    
+    public var configFile: ArduinoCliConfigFile?
+    {
+        do
+        {
+            let configPathURL = URL(fileURLWithPath: self.configFilePath)
+            let fileData = try Data(contentsOf: configPathURL)
+            let yamlDecoder = YAMLDecoder()
+            return try yamlDecoder.decode(ArduinoCliConfigFile.self, from: fileData)
+        }
+        catch
+        {
+            return nil
+        }
+    }
 
     public init?(additionalUrls: String? = nil, configFile: String? = nil, format: String? = nil, help: Bool = false, logFile: String? = nil, logFormat: String? = nil, logLevel: String? = nil, noColor: Bool = false, verbose: Bool = false)
     {
@@ -37,7 +53,17 @@ public class ArduinoCli
         }
 
         self.additionalUrls = additionalUrls
-        self.configFile = configFile
+        
+        if let configFile = configFile
+        {
+            self.configFilePath = configFile
+        }
+        else
+        {
+            let defaultConfigPath = File.homeDirectory().appendingPathComponent("Libraries/Arduino15/arduino-cli.yaml").path
+            self.configFilePath = defaultConfigPath
+        }
+        
         self.format = format
         self.help = help
         self.logFile = logFile
@@ -77,10 +103,8 @@ public class ArduinoCli
         }
         
         // The custom config file (if not specified the default will be used).
-        if let configFile = self.configFile {
-            globalArgs.append("--config-file")
-            globalArgs.append(configFile)
-        }
+        globalArgs.append("--config-file")
+        globalArgs.append(self.configFilePath)
         
         // The output format for the logs, can be: text, json, jsonmini (default "text")
         if let format = self.format {
@@ -121,12 +145,15 @@ public class ArduinoCli
             globalArgs.append("-v")
         }
         
-        guard let (exitCode, output, _) = command.run("arduino-cli", globalArgs) else
+        guard let (exitCode, output, stdErr) = command.run("arduino-cli", globalArgs) else
         {
             throw ArduinoCliError.commandFailed
         }
         
         guard exitCode == 0 else {
+            print(globalArgs)
+            print(output.string)
+            print(stdErr.string)
             throw ArduinoCliError.commandFailed
         }
         
@@ -558,7 +585,7 @@ public class ArduinoCli
     /// - Parameter verify: Verify uploaded binary after the upload.
     ///
     /// - Throws: throws if the command fails to execute
-    public func upload(discoveryTimeout: String? = nil, boardName: String? = nil, inputDir: String? = nil, inputFile: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false) throws -> Data
+    public func upload(discoveryTimeout: String? = nil, boardName: String? = nil, inputDir: String? = nil, inputFile: String? = nil, port: String? = nil, programmer: String? = nil, portProtocol: String? = nil, verify: Bool = false, sketchPath: String? = nil) throws -> Data
     {
         var args: [String] = ["upload"]
         
@@ -601,7 +628,21 @@ public class ArduinoCli
             args.append("-t")
         }
         
-        return try self.run(args)
+        if let sketchPath = sketchPath {
+            guard File.pushd(sketchPath)else {
+                throw SketchErrors.pushdFailed
+            }
+        }
+        
+        let uploadResult = try self.run(args)
+        
+        if sketchPath != nil {
+            guard File.popd() else {
+                throw SketchErrors.popdFailed
+            }
+        }
+        
+        return uploadResult
     }
     
     /// Shows version number of Arduino CLI.
